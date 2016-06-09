@@ -28,6 +28,14 @@
 // structs
 ////////////////////////////////////////////////////////////////////////////////
 
+struct ARGS {
+  const char *velocityfilename;
+  const char *startpointsfilename;
+  const char *forwardstarfilename;
+  const char *traveltimefilenameprefix;
+};
+
+
 struct FORWARDSTAR {
   struct POINT3D pos;
   float halfdistance;
