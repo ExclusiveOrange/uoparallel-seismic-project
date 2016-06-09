@@ -557,17 +557,15 @@ void
 do_writetttofile (
   struct STATE *state
 )
+// each MPI node writes its region to its own file
 {
-  // TODO: for now, just writing to my own text file:
-  //       filename: tt_mincoords_maxcoords.txt
-  //       x,y,z,val
-
   const struct FLOATBOX ttbox = state->ttbox;
 
   char filename[1024];
   sprintf (
     filename,
-    "tt_%d-%d-%d_to_%d-%d-%d.txt",
+    "%s_%d-%d-%d_to_%d-%d-%d.txt",
+    state->args.traveltimefilenameprefix,
     ttbox.omin.x, ttbox.omin.y, ttbox.omin.z,
     ttbox.omax.x, ttbox.omax.y, ttbox.omax.z
   );
