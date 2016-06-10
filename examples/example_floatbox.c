@@ -39,7 +39,7 @@ int main()
         puts( "\tcalling boxsetall(..)..." );
         boxsetall( box, val );
         puts( "\tchecking values..." );
-        for( long i = 0; i <= box.offset.m; i++ ) {
+        for( long i = 0; i < box.flat_size; i++ ) {
             if( box.flat[i] != val ) {
                 printf( "boxsetall: expected != stored at index %lu\n", i );
                 exit(0);
@@ -52,7 +52,7 @@ int main()
 
     // give each element a unique value so we can check other functions
     puts( "directly setting values of box.flat[]..." );
-    for( long i = 0; i <= box.offset.m; i++ ) {
+    for( long i = 0; i < box.flat_size; i++ ) {
         box.flat[i] = (float)i;
     }
     puts( "\tdone" );
