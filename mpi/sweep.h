@@ -30,7 +30,6 @@ do_sweep (
   // copy some state into local stack memory for fastness
   const struct FLOATBOX vbox = state->vbox;
   const struct FLOATBOX ttbox = state->ttbox;
-  const struct POINT3D ttstart = state->ttstart;
   const struct FORWARDSTAR * const star = state->star;
   const int numinstar = state->numinstar;
 
@@ -48,6 +47,8 @@ do_sweep (
         const float vel_here = boxgetglobal( vbox, here );
         const float tt_here = boxgetglobal( ttbox, here );
 
+        float new_tt_here = tt_here;
+
         for( int l = 0; l < numinstar; l++ ) {
 
           // find point in forward star based on offsets
@@ -64,42 +65,25 @@ do_sweep (
           // compute delay from 'here' to 'there' with endpoint average
           const float vel_there = boxgetglobal( vbox, there );
           const float delay = star[l].halfdistance * (vel_here + vel_there);
-          
-          // ignore the starting point
-          if( p3disnotequal( here, ttstart ) ) {
 
-            const float tt_there = boxgetglobal( ttbox, there );
+          // current travel time from start point to 'there'
+          const float tt_there = boxgetglobal( ttbox, there );
 
-            // if offset point has infinity travel time, then update
-            if ((tt_here == INFINITY) && (tt_there == INFINITY)) {
-              continue;
-            }
-
-            if ((tt_here != INFINITY) && (tt_there == INFINITY)) {
-              boxputglobal( ttbox, there, delay + tt_here );
-              changes++;
-              continue;
-            }
-
-            if ((tt_here == INFINITY) && (tt_there != INFINITY)) {
-              boxputglobal( ttbox, here, delay + tt_there );
-              changes++;
-              continue;
-            }
-
-            if ((tt_here != INFINITY) && (tt_there != INFINITY)) {
-              // if a shorter travel time through 'there', update 'here'
-              if ((delay + tt_there) < tt_here) {
-                boxputglobal( ttbox, here, delay + tt_there );
-                changes++;
-              }
-              // if a shorter travel time through 'here', update 'there'
-              else if ((delay + tt_here) < tt_there) {
-                boxputglobal( ttbox, there, delay + tt_here );
-                changes++;
-              }
-            }
+          // update (maybe) tt_there with a better time
+          const float maybe_new_tt_there = new_tt_here + delay;
+          if( maybe_new_tt_there < tt_there ) {
+            changes++;
+            boxputglobal( ttbox, there, maybe_new_tt_there );
           }
+
+          // update (maybe) new_tt_here with a potentially better time
+          new_tt_here = fmin( new_tt_here, tt_there + delay );
+        }
+
+        // if a faster path was found, use it
+        if( new_tt_here < tt_here ) {
+          changes++;
+          boxputglobal( ttbox, here, new_tt_here );
         }
       }
     }
@@ -110,5 +94,6 @@ do_sweep (
 
 
 ////////////////////////////////////////////////////////////////////////////////
+// vim: set tabstop=2 shiftwidth=2 softtabstop=2 expandtab:
 // END
 ////////////////////////////////////////////////////////////////////////////////
