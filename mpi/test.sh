@@ -6,6 +6,7 @@
 VELFILE="../data/velocity-241-241-51.vbox"
 STARTFILE="../docs/start-4.txt"
 FORWARDSTARFILE="../docs/818-FS.txt"
+#FORWARDSTARFILE="6-star.txt"
 OUTPUTDIRECTORY="../output"
 TRAVELTIMEFILENAMEPREFIX="${OUTPUTDIRECTORY}/tt-241-241-51-out"
 
