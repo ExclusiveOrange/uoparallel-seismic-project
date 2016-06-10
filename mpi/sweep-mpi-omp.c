@@ -77,7 +77,8 @@ main (
   do_getargs( &state, argc, argv );
 
   // show some OpenMP information
-  if( state.myrank == 0 ) printf( "openMP max threads: %d\n", omp_get_max_threads() );
+  printf( "%d: openMP max threads: %d\n",
+    state.myrank, omp_get_max_threads() );
 
   // read forward star
   do_preparestar( &state );
@@ -266,7 +267,7 @@ do_sharempibuffers (
     const struct FLOATBOX send = state->neighbors[n].send;
     boxcopysubset( send, ttbox, send.omin, send.omax );
     MPI_Isend (
-      send.flat, send.offset.m + 1, MPI_FLOAT,
+      send.flat, send.flat_size, MPI_FLOAT,
       state->neighbors[n].rank, state->myrank,
       MPI_COMM_WORLD, &mpireqs[ reqnumber++ ]
     );
@@ -276,7 +277,7 @@ do_sharempibuffers (
   for( int n = 0; n < state->numneighbors; n++ ) {
     const struct FLOATBOX recv = state->neighbors[n].recv;
     MPI_Irecv (
-      recv.flat, recv.offset.m + 1, MPI_FLOAT,
+      recv.flat, recv.flat_size, MPI_FLOAT,
       state->neighbors[n].rank, state->neighbors[n].rank,
       MPI_COMM_WORLD, &mpireqs[ reqnumber++ ]
     );
@@ -298,9 +299,6 @@ do_preparempibuffers (
 )
 // allocates send and receive buffers for adjacent neighbors
 {
-  // number of values (not bytes) total in each type of buffer for this rank
-  long sendsize = 0, recvsize = 0;
-
   // start with 0 neighbors, and increment as they are discovered
   state->numneighbors = 0;
 
@@ -377,8 +375,6 @@ do_preparempibuffers (
                 fflush( stdout );
                 MPI_Abort( MPI_COMM_WORLD, 1 );
               }
-              sendsize += neighbor->send.offset.m + 1;
-              recvsize += neighbor->recv.offset.m + 1;
             }
           }
         }
