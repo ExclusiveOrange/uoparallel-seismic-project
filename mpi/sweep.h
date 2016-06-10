@@ -24,7 +24,8 @@
 
 // beware: multiple OMP threads will result in nondeterministic convergence
 //         due to races when changing travel times.
-#define SWEEP_OMP_MAX_THREADS 1
+// however: it should take fewer sweeps with more OMP threads
+#define SWEEP_OMP_MAX_THREADS 16
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -45,8 +46,8 @@ do_sweep (
   // count how many (if any) values we change
   long changes = 0;
 
-  //#pragma omp parallel for default(shared) \
-  //  reduction(+:changes) schedule(dynamic) num_threads(SWEEP_OMP_MAX_THREADS)
+  #pragma omp parallel for default(shared) \
+    reduction(+:changes) schedule(dynamic) num_threads(SWEEP_OMP_MAX_THREADS)
   for( int x = vbox.imin.x; x <= vbox.imax.x; x++ ) {
 
     const int minx = vbox.omin.x - x;
