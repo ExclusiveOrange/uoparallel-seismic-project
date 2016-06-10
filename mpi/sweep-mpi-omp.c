@@ -80,9 +80,6 @@ main (
   printf( "%d: openMP max threads: %d\n",
     state.myrank, omp_get_max_threads() );
 
-  // read forward star
-  do_preparestar( &state );
-
   // these functions do different things depending on this rank
   do_loaddatafromfiles( &state );
   do_preparempibuffers( &state );
@@ -92,6 +89,9 @@ main (
 
   // ttbox == travel time FLOATBOX: includes ghost regions
   do_preparettbox( &state );
+
+  // read forward star
+  do_preparestar( &state );
 
   // will stay in here for a while
   do_workloop( &state );
@@ -388,6 +388,7 @@ void
 do_preparestar (
   struct STATE *state
 )
+// NOTE: state->vbox must be already prepared!
 {
   FILE *infile;
   if( NULL != (infile = fopen( state->args.forwardstarfilename, "r" )) ) {
@@ -403,6 +404,7 @@ do_preparestar (
 
         if( 3 == fscanf( infile, "%d %d %d", &pos.x, &pos.y, &pos.z ) ) {
           star[i].pos = pos;
+          star[i].offset = boxindex( state->vbox, pos ); 
           star[i].halfdistance = FSDELTA * 0.5 * sqrt (
             pos.x * pos.x + pos.y * pos.y + pos.z * pos.z
           );
