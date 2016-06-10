@@ -44,8 +44,10 @@ do_sweep (
 
         const struct POINT3D here = p3d( x, y, z );
 
-        const float vel_here = boxgetglobal( vbox, here );
-        const float tt_here = boxgetglobal( ttbox, here );
+        const long index_here = boxindex( ttbox, here ) - ttbox.index_omin;
+
+        const float vel_here = vbox.flat[ index_here ];
+        const float tt_here = ttbox.flat[ index_here ];
 
         float new_tt_here = tt_here;
 
@@ -61,19 +63,21 @@ do_sweep (
           ) {
             continue;
           }
+
+          const long index_there = index_here + star[l].offset;
           
           // compute delay from 'here' to 'there' with endpoint average
-          const float vel_there = boxgetglobal( vbox, there );
+          const float vel_there = vbox.flat[ index_there ];
           const float delay = star[l].halfdistance * (vel_here + vel_there);
 
           // current travel time from start point to 'there'
-          const float tt_there = boxgetglobal( ttbox, there );
+          const float tt_there = ttbox.flat[ index_there ];
 
           // update (maybe) tt_there with a better time
           const float maybe_new_tt_there = new_tt_here + delay;
           if( maybe_new_tt_there < tt_there ) {
             changes++;
-            boxputglobal( ttbox, there, maybe_new_tt_there );
+            ttbox.flat[ index_there ] = maybe_new_tt_there;
           }
 
           // update (maybe) new_tt_here with a potentially better time
@@ -83,7 +87,7 @@ do_sweep (
         // if a faster path was found, use it
         if( new_tt_here < tt_here ) {
           changes++;
-          boxputglobal( ttbox, here, new_tt_here );
+          ttbox.flat[ index_here ] = new_tt_here;
         }
       }
     }
