@@ -1,8 +1,14 @@
 #!/bin/bash
-#SBATCH -N 2
+################################################################################
+# run.sh - example script for running sweep-mpi-omp with the 241-241-51 data
+################################################################################
 
-DIR=$HOME/uoparallel-seismic-project/mpi
+VELFILE="../data/velocity-241-241-51.vbox"
+STARTFILE="../docs/start-1-241-241-51.txt"
+FORWARDSTARFILE="../docs/818-FS.txt"
+OUTPUTDIRECTORY="../output"
+TRAVELTIMEFILENAMEPREFIX="${OUTPUTDIRECTORY}/tt-241-241-51-out"
 
-module load mpi
-cd $DIR
-mpirun -np 4 -cpupernode -cpuperrank $DIR/test.sh > $DIR/output
+mkdir $OUTPUTDIRECTORY 2>/dev/null
+
+./sweep-mpi-omp $VELFILE $STARTFILE $FORWARDSTARFILE $TRAVELTIMEFILENAMEPREFIX

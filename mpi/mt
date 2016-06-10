@@ -1,4 +1,0 @@
-#!/bin/sh
-
-mpirun -np 8 $(pwd)/test.sh # > $(pwd)/mpirun.log
-#mpirun -np 2 -pernode -cpus-per-rank 12 $(pwd)/t # > $(pwd)/mpirun.log

@@ -25,6 +25,7 @@
 // beware: multiple OMP threads will result in nondeterministic convergence
 //         due to races when changing travel times.
 // however: it should take fewer sweeps with more OMP threads
+#define USE_OMP
 #define SWEEP_OMP_MAX_THREADS 16
 
 
@@ -46,8 +47,10 @@ do_sweep (
   // count how many (if any) values we change
   long changes = 0;
 
+  #ifdef USE_OMP
   #pragma omp parallel for default(shared) \
     reduction(+:changes) schedule(dynamic) num_threads(SWEEP_OMP_MAX_THREADS)
+  #endif
   for( int x = vbox.imin.x; x <= vbox.imax.x; x++ ) {
 
     const int minx = vbox.omin.x - x;
@@ -68,6 +71,12 @@ do_sweep (
         const float vel_here = vbox.flat[ index_here ];
 
         float new_tt_here = ttbox.flat[ index_here ];
+
+        // TODO: instead of going through a forward star list, which is
+        //       difficult to parallelize efficiently,
+        //       work out a way to iterate through the x,y,z's of a forward
+        //       star, with either the distance precomputed or quickly calculated here
+        //       to reduce memory usage.
 
         for( int l = 0; l < numinstar; l++ ) {
 

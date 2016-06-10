@@ -1,11 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 // sweep-mpi-omp.c
 ////////////////////////////////////////////////////////////////////////////////
-//
-// TODO:
-//   * support multiple start points
-//
-////////////////////////////////////////////////////////////////////////////////
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -48,7 +43,8 @@ void do_freempibuffers( struct STATE *state );
 void do_getargs( struct STATE *state, int argc, char *argv[] );
 void do_initmpi( struct STATE *state, int argc, char *argv[] );
 void do_initstate( struct STATE *state );
-void do_loaddatafromfiles( struct STATE *state );
+void do_loadstartingpointfromfile( struct STATE *state );
+void do_loadvelocitiesfromfile( struct STATE *state );
 void do_preparempibuffers( struct STATE *state );
 void do_preparestar( struct STATE *state );
 void do_preparettbox( struct STATE *state );
@@ -81,11 +77,12 @@ main (
     state.myrank, omp_get_max_threads() );
 
   // these functions do different things depending on this rank
-  do_loaddatafromfiles( &state );
+  do_loadvelocitiesfromfile( &state );
   do_preparempibuffers( &state );
 
   // TODO: read start position from somewhere
-  state.ttstart = p3d( 152, 20, 1 );
+  //state.ttstart = p3d( 152, 20, 1 );
+  do_loadstartingpointfromfile( &state );
 
   // ttbox == travel time FLOATBOX: includes ghost regions
   do_preparettbox( &state );
@@ -200,7 +197,35 @@ do_initstate (
 
 
 void
-do_loaddatafromfiles (
+do_loadstartingpointfromfile (
+  struct STATE *state
+)
+{
+  FILE *infile = fopen( state->args.startpointsfilename, "r" );
+  if( infile == NULL ) {
+    fprintf (
+      stderr,
+      "%d: can't open start points file %s\n",
+      state->myrank, state->args.startpointsfilename
+    );
+    fflush( stdout );
+    MPI_Abort( MPI_COMM_WORLD, 1 );
+  }
+
+  int numstarts;
+  fscanf( infile, "%d\n", &numstarts );
+
+  int x, y, z;
+  fscanf( infile, "%d %d %d", &x, &y, &z );
+
+  state->ttstart = p3d( x, y, z );
+
+  fclose( infile );
+}
+
+
+void
+do_loadvelocitiesfromfile (
   struct STATE *state
 )
 {

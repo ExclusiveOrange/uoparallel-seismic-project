@@ -13,7 +13,7 @@ $(PROGS) : % : %.c
 	$(CC) $(MPI_COMPILE_FLAGS) $(LIBS) $(INCLUDE) $< $(MPI_LINK_FLAGS) -o $@
 
 job: sweep-mpi-omp
-	qsub -q generic run.sh
+	qsub -q generic mpirun.sh
 
 clean:
 	$(RM) run.sh.* output $(PROGS)
