@@ -57,12 +57,10 @@ struct FLOATBOX {
     struct POINT3D omin, omax;         // outer minimum, maximum in box
     struct POINT3D imin, imax;         // inner minimum, maximum in box
     struct { long x, y, z; } stride;   // for quickly computing indices
-    struct {
-        long o;                        // hypothetical index of omin
-        long i;                        // hypothetical index of imin
-        long m;                        // actual index of size-1 (max index)
-    } offset;
+    long flat_size;                    // number of elements in flat
     float *flat;                       // [x][y][z] order
+    float *flat_global;                // starts at flat - omin
+    float *flat_inner;                 // starts at flat + (imin - omin)
 };
 
 
@@ -118,11 +116,10 @@ boxalloc (
     box->stride.y = size.z;
     box->stride.z = 1;
 
-    box->offset.o = boxindex( *box, omin );
-    box->offset.i = boxindex( *box, imin );
-    box->offset.m = boxindex( *box, p3dsubp3d( omax, omin) );
-
+    box->flat_size = boxindex( *box, p3dsubp3d( omax, omin ) ) + 1;
     box->flat = flat;
+    box->flat_global = flat - boxindex( *box, omin );
+    box->flat_inner = flat + boxindex( *box, p3dsubp3d( imin, omin ) );
 
     return 1;
 }
@@ -173,7 +170,7 @@ boxgetglobal (
 )
 // global coordinates (from box.omin to box.omax)
 {
-    return box.flat[ boxindex( box, pt ) - box.offset.o ];
+    return box.flat_global[ boxindex( box, pt ) ];
 }
 
 
@@ -186,7 +183,7 @@ boxputglobal (
 )
 // global coordinates (from box.omin to box.omax)
 {
-    box.flat[ boxindex( box, pt ) - box.offset.o ] = val;
+    box.flat_global[ boxindex( box, pt ) ] = val;
 }
 
 
@@ -198,7 +195,7 @@ boxgetinner (
 )
 // inner coordinates (from 0,0,0 to imax-imin+1)
 {
-    return box.flat[ boxindex( box, pt ) + box.offset.i ];
+    return box.flat_inner[ boxindex( box, pt ) ];
 }
 
 
@@ -211,7 +208,7 @@ boxputinner (
 )
 // inner coordinates (from 0,0,0 to imax-imin+1)
 {
-    box.flat[ boxindex( box, pt ) + box.offset.i ] = val;
+    box.flat_inner[ boxindex( box, pt ) ] = val;
 }
 
 
@@ -243,7 +240,7 @@ boxsetall (
 // sets ALL values in the volume to the given value
 {
     if( box.flat == NULL ) return;
-    for( long i = 0; i <= box.offset.m; i++ ) box.flat[i] = val;
+    for( long i = 0; i < box.flat_size; i++ ) box.flat[i] = val;
 }
 
 
@@ -275,11 +272,12 @@ boxfprint (
     fprintf( stream, "%s%sstride: (%ld, %ld, %ld)\n",
         prefix, indent,
         box.stride.x, box.stride.y, box.stride.z );
-    fprintf( stream, "%s%soffset.o: %ld, offset.i: %ld, offset.m: %ld\n",
-        prefix, indent,
-        box.offset.o, box.offset.i, box.offset.m );
-    fprintf( stream, "%s%sflat: %p\n",
-        prefix, indent, (void*)box.flat );
+    fprintf( stream, "%s%sflat_size: %ld\n", prefix, indent, box.flat_size );
+    fprintf( stream, "%s%sflat: %p\n", prefix, indent, (void*)box.flat );
+    fprintf( stream, "%s%sflat_global: %p\n",
+        prefix, indent, (void*)box.flat_global );
+    fprintf( stream, "%s%sflat_inner: %p\n",
+        prefix, indent, (void*)box.flat_inner );
     fprintf( stream, "%s}\n", prefix );
 }
 
