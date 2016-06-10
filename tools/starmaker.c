@@ -38,7 +38,7 @@ main (
     char *outfilename = argv[2];
 
     // build spherical star in memory
-    struct CHARCOORDS *coords = malloc( sizeof(char) * cube( radius + 1 ) );
+    struct CHARCOORDS *coords = malloc( sizeof(char) * cube( 2*radius + 1 ) );
 
     if( coords == NULL ) {
         fprintf( stderr, "couldn't allocate enough memory for radius %d\n", radius );
