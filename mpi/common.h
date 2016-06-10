@@ -38,6 +38,7 @@ struct ARGS {
 
 struct FORWARDSTAR {
   struct POINT3D pos;
+  long offset;            // flat array index offset for vbox and ttbox
   float halfdistance;
 };
 
