@@ -469,8 +469,8 @@ do_preparettbox (
 
   // if a start point is in this box, set it to 0
   if (
-    !p3disless( state->ttstart, state->ttbox.omin ) &&
-    !p3dismore( state->ttstart, state->ttbox.omax )
+    !p3disless( state->ttstart, state->ttbox.imin ) &&
+    !p3dismore( state->ttstart, state->ttbox.imax )
   ) {
     boxputglobal( state->ttbox, state->ttstart, 0.f );
   }
@@ -560,14 +560,16 @@ do_writetttofile (
 // each MPI node writes its region to its own file
 {
   const struct FLOATBOX ttbox = state->ttbox;
+  const struct POINT3D min = ttbox.imin;
+  const struct POINT3D max = ttbox.imax;
 
   char filename[1024];
   sprintf (
     filename,
     "%s_%d-%d-%d_to_%d-%d-%d.txt",
     state->args.traveltimefilenameprefix,
-    ttbox.omin.x, ttbox.omin.y, ttbox.omin.z,
-    ttbox.omax.x, ttbox.omax.y, ttbox.omax.z
+    min.x, min.y, min.z,
+    max.x, max.y, max.z
   );
 
   FILE *outfile = fopen( filename, "w" );
@@ -579,12 +581,12 @@ do_writetttofile (
     MPI_Abort( MPI_COMM_WORLD, 1 );
   }
 
-  for( int x = ttbox.omin.x; x <= ttbox.omax.x; x++ ) {
-    for( int y = ttbox.omin.y; y <= ttbox.omax.y; y++ ) {
-      for( int z = ttbox.omin.z; z <= ttbox.omax.z; z++ ) {
+  for( int x = min.x; x <= max.x; x++ ) {
+    for( int y = min.y; y <= max.y; y++ ) {
+      for( int z = min.z; z <= max.z; z++ ) {
         fprintf (
           outfile, "%d,%d,%d,%g\n",
-          x, y, z, boxgetglobal( ttbox, p3d( x, y, y ) )
+          x, y, z, boxgetglobal( ttbox, p3d( x, y, z ) )
         );
       }
     }
