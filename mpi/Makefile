@@ -1,5 +1,5 @@
 CC ?= gcc
-MPI_COMPILE_FLAGS = $(shell mpicc --showme:compile) -std=c99
+MPI_COMPILE_FLAGS = $(shell mpicc --showme:compile) -std=c99 -Winline
 MPI_LINK_FLAGS = $(shell mpicc --showme:link)
 INCLUDE = -I../include
 LIBS = -fopenmp
@@ -16,4 +16,4 @@ job: sweep-mpi-omp
 	qsub -q generic run.sh
 
 clean:
-	$(RM) run.sh.* output $(PROGS) output.tt
+	$(RM) run.sh.* output $(PROGS)
