@@ -17,7 +17,7 @@
 
 
 // NOTE: comment-out this next line to sweep until convergence
-#define MAXSWEEPS 1
+//#define MAXSWEEPS 1
 
 
 #define	FSRADIUSMAX	7 // maximum radius forward star

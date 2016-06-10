@@ -16,4 +16,4 @@ job: sweep-mpi-omp
 	qsub -q generic mpirun.sh
 
 clean:
-	$(RM) run.sh.* output $(PROGS)
+	$(RM) mpirun.sh.* output $(PROGS)

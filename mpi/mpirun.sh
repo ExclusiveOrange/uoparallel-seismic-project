@@ -7,6 +7,11 @@
 #
 ################################################################################
 
-MPINUMPROCS=2
+MPINUMPROCS=12
+DIR=$HOME/uoparallel-seismic-project/mpi/
 
-mpirun -np $MPINUMPROCS "$(pwd)/run.sh" # > $(pwd)/mpirun.log
+module load mpi
+
+cd $DIR
+
+mpirun -np $MPINUMPROCS "$DIR/run.sh" > "$DIR/mpirun.log" 2>&1

@@ -25,7 +25,7 @@
 // beware: multiple OMP threads will result in nondeterministic convergence
 //         due to races when changing travel times.
 // however: it should take fewer sweeps with more OMP threads
-#define USE_OMP
+//#define USE_OMP
 #define SWEEP_OMP_MAX_THREADS 16
 
 
