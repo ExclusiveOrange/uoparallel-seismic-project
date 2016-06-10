@@ -6,6 +6,7 @@ INCLUDE = -I../include
 RM ?= rm -f
 
 PROGS = velfileconvert
+PROGS += starmaker
 
 all: $(PROGS)
 
