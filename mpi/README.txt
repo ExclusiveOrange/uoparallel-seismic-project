@@ -21,11 +21,11 @@ mpicc.
 
 If you're on a cluster, you may need to do:
 
-    > module load mpi
+    module load mpi
 
 then run:
 
-    > make
+    make
 
 It should spit out:
     
@@ -81,6 +81,8 @@ from MPI that way. Instead, use:
 or if you've got access to qsub:
 
     make job
+
+To change the parameters, edit mpirun.sh and/or run.sh.
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
